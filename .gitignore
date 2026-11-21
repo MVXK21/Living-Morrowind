@@ -1,0 +1,19 @@
+# Per-user runtime data (never commit)
+.env
+.env.txt
+**/scripts/living_morrowind/worlds/
+daemon_debug.log
+daemon_debug.log.old
+openmw.log
+landmass_map.json
+landmass_map.json.tmp
+ai_request.json
+*.omwscripts.esp
+__pycache__/
+*.pyc
+
+# Build output (attached to GitHub releases instead)
+dist/
+
+# Old staging copy of the patched Sentient Morrowind
+Sentient_Morrowind_Landmass/

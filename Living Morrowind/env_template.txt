@@ -1,0 +1,6 @@
+GEMINI_API_KEY=YOUR_GEMINI_API_KEY_HERE
+# Optional overrides (normally detected automatically from Mod Organizer 2):
+# PRIMARY_MODEL=gemini-3.5-flash-lite
+# FALLBACK_MODEL=gemini-3.1-flash-lite-preview
+# OPENMW_CFG=C:/path/to/openmw.cfg
+# OPENMW_LOG=C:/path/to/openmw.log

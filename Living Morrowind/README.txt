@@ -1,0 +1,113 @@
+================================================================================
+                              LIVING MORROWIND
+            AI-driven NPCs, creatures and narrator for OpenMW (0.49 - 0.51)
+================================================================================
+
+Talk to anyone in the world in your own words. NPCs remember you, react to your
+gear, bounty, deeds and surroundings, trade and hand over items, and an evolving
+narrator chronicles your journey.
+
+Living Morrowind knows WHERE you are. On Vvardenfell people grumble about ash
+storms (only when there really is one); on Solstheim it is snow and rieklings; on
+the Morrowind mainland (Tamriel Rebuilt) it is Great House Indoril and Dres; in
+Skyrim (Skyrim: Home of the Nords, New Windhelm...) it is jarls and Reachmen; on
+Cyrodiil's Gold Coast (Project Cyrodiil) it is Colovian wine and the Nine. Your
+load order is scanned automatically, so every landmass mod you have is covered.
+
+Based on Sentient Morrowind (open permissions), with landmass awareness, a
+Mod Organizer 2 friendly layout, and stability fixes.
+
+--------------------------------------------------------------------------------
+REQUIREMENTS
+--------------------------------------------------------------------------------
+  1. OpenMW 0.49, 0.50 or 0.51.
+  2. Mod Organizer 2 with the "OpenMW Player" plugin (standard in OpenMW
+     modlists such as NEMAS). Manual installs also work; see the end of this file.
+  3. Python 3.10 or newer: https://www.python.org/downloads/
+     During setup, tick "Add python.exe to PATH".
+  4. A free Google Gemini API key: https://aistudio.google.com/  -> "Get API key"
+
+--------------------------------------------------------------------------------
+INSTALL (MO2)
+--------------------------------------------------------------------------------
+  1. In MO2, install the Living Morrowind archive like any other mod
+     (Install a new mod from an archive, or drag it into the mod list) and tick it.
+  2. In the Plugins tab, make sure living_morrowind.omwscripts is enabled
+     (it appears as "living_morrowind.omwscripts.esp" with OpenMW Player).
+
+  Do NOT enable Sentient Morrowind at the same time. Living Morrowind replaces it.
+
+  Coming from Sentient Morrowind? Copy the folder
+      scripts/sentient_morrowind/worlds   (from the old mod)
+  to  scripts/living_morrowind/worlds     (in this mod)
+  and your existing saves keep their NPC memories.
+
+--------------------------------------------------------------------------------
+PLAY
+--------------------------------------------------------------------------------
+  1. In MO2, right-click Living Morrowind -> "Open in Explorer".
+  2. Double-click  "Launch Living Morrowind.bat".
+     - The first time, it asks for your Gemini API key and saves it to .env.
+     - Leave this window open while you play.
+  3. Launch OpenMW from MO2's executable list as usual.
+  4. In game, look at an NPC or creature and press K to talk.
+     Press K with nobody targeted for the narrator. ESC or Goodbye closes the window.
+
+  Tip: you can add "Launch Living Morrowind.bat" to MO2's executables
+  (Executables -> + -> Add from file) to start the daemon from MO2's dropdown.
+
+--------------------------------------------------------------------------------
+WHAT HAPPENS AUTOMATICALLY
+--------------------------------------------------------------------------------
+  - The daemon finds your MO2 install and active profile, reads that profile's
+    openmw.cfg (your load order) and watches the openmw.log OpenMW writes,
+    wherever OpenMW Player puts it (profile folder, local saves, or Documents).
+  - On first start, and whenever your load order changes, it builds
+    landmass_map.json: every exterior cell and interior in your load order mapped
+    to Vvardenfell / Solstheim / mainland Morrowind / Skyrim / Cyrodiil / Oblivion.
+    This takes a few seconds and runs in the background.
+  - Conversations, memories and personalities are stored per save in
+    scripts/living_morrowind/worlds/ inside this mod folder.
+
+--------------------------------------------------------------------------------
+CUSTOMIZING
+--------------------------------------------------------------------------------
+  scripts/living_morrowind/config/
+    custom_npc_instructions.json        how NPCs talk and behave
+    custom_creature_instructions.json   creatures
+    custom_narrator_instructions.json   the narrator
+    custom_campaign_rules.json          summaries, journal, humor
+    custom_mod_instructions.json        your own extra rules
+    custom_lore.json                    world lore; "landmass_lore" sets what
+                                        NPCs believe about each land
+  landmass.py                           climate, wildlife, faiths and taboos per
+                                        land; region -> land table
+  .env                                  API key, optional model names, and
+                                        OPENMW_CFG / OPENMW_LOG overrides for
+                                        unusual setups (see env_template.txt)
+  addons/                               drop-in Python addons
+
+--------------------------------------------------------------------------------
+TROUBLESHOOTING
+--------------------------------------------------------------------------------
+  "Python 3.10 or newer was not found"
+      Install Python from python.org with "Add python.exe to PATH" ticked.
+  NPC replies time out after 25s
+      The daemon window must be open. Check it for errors (bad API key, quota).
+      The full log is daemon_debug.log in this folder.
+  Daemon says "No openmw.log found yet"
+      Normal before the game's first launch; it attaches automatically.
+  Wrong landmass detected
+      Delete landmass_map.json and restart the daemon to rebuild it. Regions the
+      builder reports as "not in landmass.REGION_LANDMASS" can be added to
+      landmass.py.
+  Change your API key
+      Edit or delete .env in this folder.
+
+--------------------------------------------------------------------------------
+MANUAL INSTALL (no MO2)
+--------------------------------------------------------------------------------
+  Put this folder anywhere, add it as a data path in openmw.cfg
+  (data="C:/path/to/Living Morrowind"), add content=living_morrowind.omwscripts,
+  then run "Launch Living Morrowind.bat" before starting OpenMW.
+================================================================================

@@ -1,0 +1,2 @@
+GLOBAL: scripts/living_morrowind/sent_global.lua
+PLAYER: scripts/living_morrowind/openmw_main.lua
