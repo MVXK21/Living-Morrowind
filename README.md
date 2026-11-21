@@ -33,6 +33,31 @@ Based on **Sentient Morrowind** (released with open permissions), with landmass 
 
 The daemon finds your MO2 install, the active profile, its `openmw.cfg` and the `openmw.log` OpenMW Player uses. It then builds a landmass map of your load order in the background, and rebuilds it whenever the load order changes.
 
+## Install without MO2
+
+Extract the zip to a folder of its own (for example `C:\Games\Living Morrowind`) and add it to OpenMW, either in the OpenMW Launcher's **Data Files** tab (then tick `living_morrowind.omwscripts`), or in `openmw.cfg`:
+
+```
+data="C:/Games/Living Morrowind"
+content=living_morrowind.omwscripts
+```
+
+Then run `Launch Living Morrowind.bat` from that folder and start OpenMW normally. Extracting into Morrowind's `Data Files` also works, and other mod managers work as long as the mod ends up as an OpenMW data folder.
+
+Without MO2 the daemon reads `openmw.cfg` and `openmw.log` from OpenMW's standard config folder:
+
+| OS | Folder |
+| --- | --- |
+| Windows | `Documents\My Games\OpenMW` (OneDrive Documents too) |
+| Linux | `~/.config/openmw` (Flatpak: `~/.var/app/org.openmw.OpenMW/config/openmw`) |
+| macOS | `~/Library/Preferences/openmw` |
+
+If yours are elsewhere, set `OPENMW_CFG=` and `OPENMW_LOG=` in `.env`.
+
+### Linux and macOS (untested)
+
+The `.bat` launcher is Windows-only. Install the mod as above, copy `env_template.txt` to `.env` and add your Gemini API key, then run `python3 main.py` in the mod folder. This should work but hasn't been tested on those systems yet; please open an issue if it doesn't.
+
 **Coming from Sentient Morrowind?** Copy `scripts/sentient_morrowind/worlds/` from the old mod into `scripts/living_morrowind/worlds/` and your saves keep their NPC memories.
 
 ## Repository layout

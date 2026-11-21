@@ -144,8 +144,11 @@ def _openmw_dirs():
             dirs.append(os.path.join(mo2["profile_dir"], "openmw"))  # profile-local saves (user-data)
         dirs.append(os.path.join(mo2["base"], "plugins", "data", "openmwplayer"))
     for docs in _documents_dirs():
-        dirs.append(os.path.join(docs, "My Games", "OpenMW"))
-    dirs.append(os.path.join(os.path.expanduser("~"), ".config", "openmw"))
+        dirs.append(os.path.join(docs, "My Games", "OpenMW"))          # Windows
+    home = os.path.expanduser("~")
+    dirs.append(os.path.join(home, ".config", "openmw"))                # Linux
+    dirs.append(os.path.join(home, ".var", "app", "org.openmw.OpenMW", "config", "openmw"))  # Linux Flatpak
+    dirs.append(os.path.join(home, "Library", "Preferences", "openmw"))  # macOS
     return list(dict.fromkeys(os.path.normpath(d) for d in dirs))
 
 
@@ -189,6 +192,6 @@ def describe():
     if mo2:
         lines.append(f"Mod Organizer 2: {mo2['base']} (profile: {mo2.get('profile') or '?'})")
     else:
-        lines.append("Mod Organizer 2: not detected (using Documents/My Games/OpenMW)")
+        lines.append("Mod Organizer 2: not detected (using OpenMW's standard config folder)")
     lines.append(f"openmw.cfg: {find_openmw_cfg() or 'not found'}")
     return lines

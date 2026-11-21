@@ -107,7 +107,37 @@ TROUBLESHOOTING
 --------------------------------------------------------------------------------
 MANUAL INSTALL (no MO2)
 --------------------------------------------------------------------------------
-  Put this folder anywhere, add it as a data path in openmw.cfg
-  (data="C:/path/to/Living Morrowind"), add content=living_morrowind.omwscripts,
-  then run "Launch Living Morrowind.bat" before starting OpenMW.
+  1. Extract the archive to a folder of its own, e.g. C:\Games\Living Morrowind
+     (keep everything together: the daemon must stay next to "scripts").
+  2. Add that folder to OpenMW, either way:
+       - OpenMW Launcher -> Data Files -> add the folder as a data directory,
+         then tick living_morrowind.omwscripts in the content list, or
+       - edit openmw.cfg and add these two lines:
+             data="C:/Games/Living Morrowind"
+             content=living_morrowind.omwscripts
+  3. Run "Launch Living Morrowind.bat" from that folder, then start OpenMW
+     normally (launcher or openmw.exe).
+
+  Extracting straight into Morrowind's "Data Files" folder also works, but it
+  scatters the daemon files among your game data; a separate folder is tidier.
+  You still need to tick living_morrowind.omwscripts.
+
+  Without MO2, the daemon reads openmw.cfg and openmw.log from OpenMW's standard
+  config folder:
+      Windows   Documents\My Games\OpenMW   (including OneDrive Documents)
+      Linux     ~/.config/openmw   (Flatpak: ~/.var/app/org.openmw.OpenMW/config/openmw)
+      macOS     ~/Library/Preferences/openmw
+  If yours are elsewhere, set OPENMW_CFG= and OPENMW_LOG= in .env.
+  Other mod managers (Vortex etc.) work the same way as long as the mod ends up
+  as an OpenMW data folder.
+
+--------------------------------------------------------------------------------
+LINUX AND macOS (untested)
+--------------------------------------------------------------------------------
+  The launcher .bat is Windows-only. On Linux or macOS:
+    1. Install the mod as above (add the folder as an OpenMW data directory).
+    2. Copy env_template.txt to .env and put your Gemini API key in it.
+    3. Open a terminal in the mod folder and run:   python3 main.py
+  Python 3.10+ is required. This should work but has not been tested on these
+  systems yet; please report problems on GitHub.
 ================================================================================
