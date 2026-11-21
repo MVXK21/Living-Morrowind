@@ -15,7 +15,7 @@ Living Morrowind knows **where you are**. Every landmass in your load order is d
 | Cyrodiil | Project Cyrodiil | the Gold Coast, Anvil, Colovian wine, the Nine Divines |
 | Oblivion | Daedric-realm mods | the realm's Daedric Prince |
 
-Based on **Sentient Morrowind** (released with open permissions), with landmass awareness, an MO2-friendly layout and stability fixes.
+Based on [**Sentient Morrowind**](https://www.nexusmods.com/morrowind/mods/60221) by **BooskTheBold** (released with open permissions), with landmass awareness, an MO2-friendly layout and stability fixes.
 
 ## Install (MO2 + OpenMW Player)
 
@@ -82,3 +82,9 @@ See [`Living Morrowind/README.txt`](Living%20Morrowind/README.txt) for customiza
 ```
 python build_release.py 1.0.0
 ```
+
+## Credits
+
+- **BooskTheBold**: author of [Sentient Morrowind](https://www.nexusmods.com/morrowind/mods/60221), the original mod this is built on: the AI daemon, OpenMW Lua scripts, dialogue UI, memory system and prompt design. Released with open permissions; please support the original.
+- Living Morrowind changes (landmass awareness, MO2 packaging, fixes): MVXK21.
+- Landmass detection reads data from [Tamriel Rebuilt](https://www.tamriel-rebuilt.org/), [Project Cyrodiil and Skyrim: Home of the Nords](https://www.project-tamriel.com/), and Tomb of the Snow Prince when they're in your load order; no files from those mods are included.

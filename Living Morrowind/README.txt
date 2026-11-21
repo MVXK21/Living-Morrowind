@@ -14,8 +14,9 @@ Skyrim (Skyrim: Home of the Nords, New Windhelm...) it is jarls and Reachmen; on
 Cyrodiil's Gold Coast (Project Cyrodiil) it is Colovian wine and the Nine. Your
 load order is scanned automatically, so every landmass mod you have is covered.
 
-Based on Sentient Morrowind (open permissions), with landmass awareness, a
-Mod Organizer 2 friendly layout, and stability fixes.
+Based on Sentient Morrowind by BooskTheBold (open permissions), with landmass
+awareness, a Mod Organizer 2 friendly layout, and stability fixes.
+Original mod: https://www.nexusmods.com/morrowind/mods/60221
 
 --------------------------------------------------------------------------------
 REQUIREMENTS
@@ -140,4 +141,14 @@ LINUX AND macOS (untested)
     3. Open a terminal in the mod folder and run:   python3 main.py
   Python 3.10+ is required. This should work but has not been tested on these
   systems yet; please report problems on GitHub.
+
+--------------------------------------------------------------------------------
+CREDITS
+--------------------------------------------------------------------------------
+  BooskTheBold - author of Sentient Morrowind, the original mod this is built
+                 on (AI daemon, OpenMW Lua scripts, dialogue UI, memory system,
+                 prompt design). Released with open permissions; please support
+                 the original: https://www.nexusmods.com/morrowind/mods/60221
+  MVXK21       - Living Morrowind changes: landmass awareness, MO2 packaging,
+                 fixes.  https://github.com/MVXK21/Living-Morrowind
 ================================================================================
