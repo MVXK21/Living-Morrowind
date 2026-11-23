@@ -11,6 +11,8 @@ local I        = require('openmw.interfaces')
 local sentIPC  = require('scripts.living_morrowind.sent_ipc')
 local sentSer  = require('scripts.living_morrowind.sent_serialize')
 local sentUI   = require('scripts.living_morrowind.sent_ui')
+local sentChat = require('scripts.living_morrowind.sent_dialogue_chat')
+local sentGuard = require('scripts.living_morrowind.sent_input_guard')
 
 local UI       = I.UI
 local Controls = I.Controls
@@ -361,6 +363,83 @@ logActionEvent = function(evtText)
     sentIPC.emit(evtPayload, evtReqId)
 end
 
+local PROTECTED_QUEST_ITEMS = {
+    ["bk_a1_1_caiuspackage"] = true,
+    ["bk_a1_1_directionscaiuscosades"] = true,
+    ["dwemer_puzzle_box"] = true,
+    ["misc_dwrv_ark_cube00"] = true,
+    ["skull_llevule"] = true,
+    ["bk_sharn_necromancynotes"] = true,
+    ["bk_huleeyanotes"] = true,
+    ["bk_mehraamunotes"] = true,
+    ["bk_hassournotes"] = true,
+    ["corprus weepings_unique"] = true,
+    ["misc_6th_ash_statue_01"] = true,
+    ["wraithguard"] = true,
+    ["misc_wraithguard_no_equip"] = true,
+    ["wraithguard_jury_rig"] = true,
+    ["keening"] = true,
+    ["sunder"] = true,
+    ["moon_and_star"] = true,
+    ["shadow_shield"] = true,
+    ["teeth_of_the_urshilaku"] = true,
+    ["madstone"] = true,
+    ["robe_hortator"] = true,
+    ["ring_hortator"] = true,
+    ["belt_hortator"] = true,
+    ["amulet_hortator"] = true,
+    ["bk_processus_tax"] = true,
+    ["note to hrisskar"] = true,
+    ["chargen captain's door"] = true,
+    ["chargen door key"] = true,
+    ["key_chargen_doors"] = true,
+    ["key_chargen_cabinet"] = true,
+    ["chargendoorjournal"] = true,
+    ["artifact_azura_star"] = true,
+    ["artifact_bittercup"] = true,
+    ["claymore_chrysamere"] = true,
+    ["katana_goldbrand_unique"] = true,
+    ["volendrung"] = true,
+    ["longsword_umbra_unique"] = true,
+    ["boots_apostle_unique"] = true,
+    ["boots_blind_unique"] = true,
+    ["boots_speed_unique"] = true,
+    ["cuirass_savior_unique"] = true,
+    ["ebon_plate_cuirass_unique"] = true,
+    ["cuirass_dragonbone_unique"] = true,
+    ["helm_oreyn_bearclaw_unique"] = true,
+    ["helm_clavicusvile"] = true,
+    ["shield_auriel"] = true,
+    ["shield_eleidon_unique"] = true,
+    ["shield_spellbreaker"] = true,
+    ["staff_magnus_unique"] = true,
+    ["staff_hasedoki_unique"] = true,
+    ["mace_molag_bal_unique"] = true,
+    ["mace_slurring_unique"] = true,
+    ["dagger_fang_unique"] = true,
+    ["bow_of_shadows"] = true,
+    ["blade_nornal"] = true,
+    ["pyroil_tar"] = true,
+}
+
+local function filterProtectedItems(itemList)
+    if not itemList then return nil end
+    local safe = {}
+    for _, it in ipairs(itemList) do
+        local recId = (it.id or ""):lower():match("^%s*(.-)%s*$")
+        local isProtected = PROTECTED_QUEST_ITEMS[recId]
+            or recId:sub(1, 6) == "bk_a1_" or recId:sub(1, 6) == "bk_a2_"
+            or recId:sub(1, 6) == "index_" or recId:sub(1, 11) == "key_chargen"
+        if not isProtected then
+            table.insert(safe, it)
+        else
+            print(string.format("[LIVINGMW_UI SECURITY] Filtered protected quest item/artifact: '%s'", recId))
+        end
+    end
+    if #safe > 0 then return safe end
+    return nil
+end
+
 sendAIRequest = function(promptText, isSystemMsg)
     if not promptText or promptText == "" then return end
     if not isSystemMsg then
@@ -400,83 +479,6 @@ sendAIRequest = function(promptText, isSystemMsg)
             sentIPC.escapeJSON(worldId), parentClause, reqId,
             sentIPC.toJSON(pDataFull), sentIPC.toJSON(targetData or {}), sentIPC.toJSON(promptNearby)
         )
-
-        local PROTECTED_QUEST_ITEMS = {
-            ["bk_a1_1_caiuspackage"] = true,
-            ["bk_a1_1_directionscaiuscosades"] = true,
-            ["dwemer_puzzle_box"] = true,
-            ["misc_dwrv_ark_cube00"] = true,
-            ["skull_llevule"] = true,
-            ["bk_sharn_necromancynotes"] = true,
-            ["bk_huleeyanotes"] = true,
-            ["bk_mehraamunotes"] = true,
-            ["bk_hassournotes"] = true,
-            ["corprus weepings_unique"] = true,
-            ["misc_6th_ash_statue_01"] = true,
-            ["wraithguard"] = true,
-            ["misc_wraithguard_no_equip"] = true,
-            ["wraithguard_jury_rig"] = true,
-            ["keening"] = true,
-            ["sunder"] = true,
-            ["moon_and_star"] = true,
-            ["shadow_shield"] = true,
-            ["teeth_of_the_urshilaku"] = true,
-            ["madstone"] = true,
-            ["robe_hortator"] = true,
-            ["ring_hortator"] = true,
-            ["belt_hortator"] = true,
-            ["amulet_hortator"] = true,
-            ["bk_processus_tax"] = true,
-            ["note to hrisskar"] = true,
-            ["chargen captain's door"] = true,
-            ["chargen door key"] = true,
-            ["key_chargen_doors"] = true,
-            ["key_chargen_cabinet"] = true,
-            ["chargendoorjournal"] = true,
-            ["artifact_azura_star"] = true,
-            ["artifact_bittercup"] = true,
-            ["claymore_chrysamere"] = true,
-            ["katana_goldbrand_unique"] = true,
-            ["volendrung"] = true,
-            ["longsword_umbra_unique"] = true,
-            ["boots_apostle_unique"] = true,
-            ["boots_blind_unique"] = true,
-            ["boots_speed_unique"] = true,
-            ["cuirass_savior_unique"] = true,
-            ["ebon_plate_cuirass_unique"] = true,
-            ["cuirass_dragonbone_unique"] = true,
-            ["helm_oreyn_bearclaw_unique"] = true,
-            ["helm_clavicusvile"] = true,
-            ["shield_auriel"] = true,
-            ["shield_eleidon_unique"] = true,
-            ["shield_spellbreaker"] = true,
-            ["staff_magnus_unique"] = true,
-            ["staff_hasedoki_unique"] = true,
-            ["mace_molag_bal_unique"] = true,
-            ["mace_slurring_unique"] = true,
-            ["dagger_fang_unique"] = true,
-            ["bow_of_shadows"] = true,
-            ["blade_nornal"] = true,
-            ["pyroil_tar"] = true,
-        }
-
-        local function filterProtectedItems(itemList)
-            if not itemList then return nil end
-            local safe = {}
-            for _, it in ipairs(itemList) do
-                local recId = (it.id or ""):lower():match("^%s*(.-)%s*$")
-                local isProtected = PROTECTED_QUEST_ITEMS[recId]
-                    or recId:sub(1, 6) == "bk_a1_" or recId:sub(1, 6) == "bk_a2_"
-                    or recId:sub(1, 6) == "index_" or recId:sub(1, 11) == "key_chargen"
-                if not isProtected then
-                    table.insert(safe, it)
-                else
-                    print(string.format("[LIVINGMW_UI SECURITY] Filtered protected quest item/artifact: '%s'", recId))
-                end
-            end
-            if #safe > 0 then return safe end
-            return nil
-        end
 
         sendIPCRequest(payload, function(raw, err)
             isThinking = false
@@ -739,6 +741,8 @@ end
 
 local function handleDialogueResponse(e)
     if not e then return end
+    -- The Chat topic only opens the input bar; it is not a real conversation line.
+    if sentChat.onDialogueResponse(e) then return end
     local pData = sentSer.getPlayerData()
     local pName = pData.name or "Player"
     local curCell = (self.cell and self.cell.name) or "Unknown Cell"
@@ -1759,6 +1763,14 @@ local function openWindow(target)
     rebuildWindow()
 end
 
+sentChat.init({
+    ipc = sentIPC,
+    ser = sentSer,
+    filterItems = filterProtectedItems,
+    makeButton = sentUI.makeButton,
+    logAction = function(text) logActionEvent(text) end,
+})
+
 local isInitialized = false
 
 local lastRecordedGameTime = 0
@@ -1807,6 +1819,9 @@ return {
 
             if not isInitialized then
                 isInitialized = true
+                pcall(function() sentChat.reset() end)
+                pcall(function() sentGuard.reset() end)
+                pcall(function() sentChat.ensureTopic() end)
                 pcall(function()
                     sentSer.resetActiveSession()
                     local activeSessionID, parentSaveID = sentSer.getGameWorldID()
@@ -1821,6 +1836,9 @@ return {
                 end)
             end
             pcall(function() checkActionEvents(dt) end)
+            pcall(sentGuard.onFrame)
+            local chatOk, chatErr = pcall(sentChat.onFrame)
+            if not chatOk then print("[LIVINGMW_CHAT ERROR] " .. tostring(chatErr)) end
             if isThinking and pendingCallback and currentReqId ~= "" then
                 local data = sentIPC.readResponseFile()
                 if data then
@@ -1855,6 +1873,7 @@ return {
             end
         end,
         onKeyPress = function(key)
+            pcall(sentGuard.onKeyPress)
             local sym  = key.symbol and key.symbol:lower() or ""
             local code = key.code
             if isInterfaceActive then
@@ -1879,6 +1898,10 @@ return {
             if isInterfaceActive then
                 closeWindow()
             else
+                -- The native dialogue menu has its own Chat topic now.
+                local mode = nil
+                pcall(function() mode = UI.getMode() end)
+                if mode == "Dialogue" then return end
                 openWindow(sentSer.performEyeRaycast())
             end
         end
@@ -1886,6 +1909,9 @@ return {
     eventHandlers = {
         UiModeChanged = function(data)
             pcall(function() handleUiModeChanged(data) end)
+            pcall(sentGuard.onUiModeChanged, data)
+            local chatOk, chatErr = pcall(sentChat.onUiModeChanged, data)
+            if not chatOk then print("[LIVINGMW_CHAT ERROR] " .. tostring(chatErr)) end
         end,
         DialogueResponse = function(e)
             pcall(function() handleDialogueResponse(e) end)

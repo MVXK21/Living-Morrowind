@@ -33,8 +33,10 @@ INSTALL (MO2)
 --------------------------------------------------------------------------------
   1. In MO2, install the Living Morrowind archive like any other mod
      (Install a new mod from an archive, or drag it into the mod list) and tick it.
-  2. In the Plugins tab, make sure living_morrowind.omwscripts is enabled
-     (it appears as "living_morrowind.omwscripts.esp" with OpenMW Player).
+  2. In the Plugins tab, make sure these are enabled:
+       - living_morrowind.omwscripts
+         (shown as "living_morrowind.omwscripts.esp" with OpenMW Player)
+       - living_morrowind_chat.esp
 
   Do NOT enable Sentient Morrowind at the same time. Living Morrowind replaces it.
 
@@ -51,7 +53,11 @@ PLAY
      - The first time, it asks for your Gemini API key and saves it to .env.
      - Leave this window open while you play.
   3. Launch OpenMW from MO2's executable list as usual.
-  4. In game, look at an NPC or creature and press K to talk.
+  4. In the normal dialogue menu, click the "* Chat *" topic, click the box
+     that appears, type, and press Enter. Replies appear in the dialogue history.
+     You can drag the bar by its "Say:" label. Hotkeys from other mods are
+     blocked while the dialogue menu is open.
+  5. Outside dialogue, look at an NPC or creature and press K for the AI window.
      Press K with nobody targeted for the narrator. ESC or Goodbye closes the window.
 
   Tip: you can add "Launch Living Morrowind.bat" to MO2's executables

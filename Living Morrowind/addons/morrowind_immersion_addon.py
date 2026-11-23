@@ -89,6 +89,7 @@ def inject_morrowind_immersion_directives(world_id, npc_id, npc_name, prompt, sy
     player_bounty = 0
     location = None
     equipped_items = []
+    combat_stance = None
     
     if os.path.exists(env_path):
         try:
@@ -99,6 +100,7 @@ def inject_morrowind_immersion_directives(world_id, npc_id, npc_name, prompt, sy
                 location = landmass.resolve(dict(player_data, cell=player_data.get("cell") or cell_name))
                 player_bounty = player_data.get("bounty", 0)
                 equipped_items = player_data.get("equipped_gear", [])
+                combat_stance = player_data.get("combat_stance")
         except Exception:
             pass
 
@@ -138,7 +140,7 @@ def inject_morrowind_immersion_directives(world_id, npc_id, npc_name, prompt, sy
         sys_prompt_lines.append(f"### Crime Alert: Player has a bounty of {player_bounty} septims! Speak with suspicion or refuse service if law-abiding.")
     
     has_elite_gear = False
-    has_drawn_weapon = False
+    has_drawn_weapon = combat_stance == "weapon_drawn"
     for item in equipped_items:
         item_str = ""
         if isinstance(item, dict):
@@ -149,8 +151,6 @@ def inject_morrowind_immersion_directives(world_id, npc_id, npc_name, prompt, sy
         name_lower = item_str.lower()
         if any(e in name_lower for e in ["daedric", "ebony", "glass"]):
             has_elite_gear = True
-        if any(w in name_lower for w in ["sword", "claymore", "dagger", "mace", "axe", "bow", "spear"]):
-            has_drawn_weapon = True
             
     if has_elite_gear or has_drawn_weapon:
         sys_prompt_lines.append("### Physical Observations")

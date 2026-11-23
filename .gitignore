@@ -17,3 +17,6 @@ dist/
 
 # Old staging copy of the patched Sentient Morrowind
 Sentient_Morrowind_Landmass/
+
+# Private version archives
+Archive/

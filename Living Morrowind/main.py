@@ -6,6 +6,7 @@ import json
 import sqlite3
 import shutil
 import paths
+import chat_layout
 import prompt_generator
 import landmass
 import addon_manager
@@ -892,6 +893,14 @@ def format_environment_context(world_id):
         skill_parts = [f"{k}: {v}" for k, v in skills.items()]
         ss.append(f"- **Skills**: {', '.join(skill_parts)}")
         
+    stance = player.get("combat_stance")
+    if stance == "weapon_drawn":
+        ss.append("- **Stance**: WEAPON DRAWN. The player is holding a readied weapon.")
+    elif stance == "spell_readied":
+        ss.append("- **Stance**: SPELL READIED. The player's hands are raised to cast; no weapon is drawn.")
+    elif stance == "sheathed":
+        ss.append("- **Stance**: WEAPON SHEATHED. Equipped weapons are stowed on the player's body or back, not in hand. Do NOT say the player is holding, brandishing, waving, or threatening with a weapon.")
+
     ss.append("\n### Equipped Gear")
     if eq_gear:
         for item in eq_gear:
@@ -1152,7 +1161,9 @@ def extract_json_from_text(text):
     return None
 
 
-def call_gemini_api(api_key, model, system_instruction, conversation_history, max_tokens=600, fallback_model="gemini-3.1-flash-lite-preview", response_mime_type=None):
+def call_gemini_api(api_key, model, system_instruction, conversation_history, max_tokens=600, fallback_model="gemini-3.1-flash-lite-preview", response_mime_type=None, interactive=False):
+    # A player is waiting on interactive calls: one quick try per model, then fail over.
+    request_timeout = 12.0 if interactive else 30.0
     clean_model = model.replace("models/", "") if model else model
     url = f"https://generativelanguage.googleapis.com/v1beta/models/{clean_model}:generateContent?key={api_key}"
     payload = {}
@@ -1189,12 +1200,12 @@ def call_gemini_api(api_key, model, system_instruction, conversation_history, ma
     
     headers = {"Content-Type": "application/json"}
     
-    max_retries = 3
+    max_retries = 1 if interactive else 3
     retry_delay = 2.0
     for attempt in range(max_retries):
         req = urllib.request.Request(url, data=json.dumps(payload).encode('utf-8'), headers=headers, method="POST")
         try:
-            with urllib.request.urlopen(req, timeout=30.0) as response:
+            with urllib.request.urlopen(req, timeout=request_timeout) as response:
                 res_data = response.read().decode('utf-8')
                 res_json = json.loads(res_data)
                 
@@ -1244,13 +1255,13 @@ def call_gemini_api(api_key, model, system_instruction, conversation_history, ma
     if fallback_model and fallback_model != clean_model:
         print(f"[AI CORE FAILOVER] Model '{clean_model}' failed/rate-limited. Failing over to backup model '{fallback_model}'...")
         next_fallback = "gemini-3.1-flash-lite-preview" if fallback_model == "gemini-3.5-flash-lite" else None
-        return call_gemini_api(api_key, fallback_model, system_instruction, conversation_history, max_tokens=max_tokens, fallback_model=next_fallback, response_mime_type=response_mime_type)
+        return call_gemini_api(api_key, fallback_model, system_instruction, conversation_history, max_tokens=max_tokens, fallback_model=next_fallback, response_mime_type=response_mime_type, interactive=interactive)
         
     return ""
 
-def call_gemini_single_prompt(api_key, model, prompt, max_tokens=400, system_instruction="You are the Morrowind Master Mind chronicler, maintaining strict lore accuracy, dry authentic Third Era wit, and campaign chronicle consistency.", response_mime_type=None):
+def call_gemini_single_prompt(api_key, model, prompt, max_tokens=400, system_instruction="You are the Morrowind Master Mind chronicler, maintaining strict lore accuracy, dry authentic Third Era wit, and campaign chronicle consistency.", response_mime_type=None, interactive=False):
     history = [{"role": "user", "text": prompt}]
-    return call_gemini_api(api_key, model, system_instruction, history, max_tokens=max_tokens, response_mime_type=response_mime_type)
+    return call_gemini_api(api_key, model, system_instruction, history, max_tokens=max_tokens, response_mime_type=response_mime_type, interactive=interactive)
 
 def clean_utf8_to_ansi(text):
     if not text:
@@ -1353,14 +1364,20 @@ def get_or_create_personality(api_key, model_name, world_id, npc_id, npc_name, e
     personality_summary = "A generic local of this land."
     long_term_goals = "Wants to survive in this harsh land."
     
-    raw_reply = call_gemini_single_prompt(api_key, model_name, prompt, max_tokens=400, system_instruction="You are the Morrowind Master Mind personality engine. Return only a valid raw JSON object.", response_mime_type="application/json")
+    raw_reply = call_gemini_single_prompt(api_key, model_name, prompt, max_tokens=400, system_instruction="You are the Morrowind Master Mind personality engine. Return only a valid raw JSON object.", response_mime_type="application/json", interactive=True)
+    generated = False
     if raw_reply:
         p_data = extract_json_from_text(raw_reply)
         if p_data and isinstance(p_data, dict):
             personality_summary = p_data.get("personality_summary", personality_summary)
             long_term_goals = p_data.get("long_term_goals", long_term_goals)
+            generated = True
         else:
             print(f"[AI CORE ERROR] Failed to parse personality JSON. Raw response: {raw_reply}")
+    if not generated:
+        # Do not save a placeholder as this NPC's permanent personality; try again next time.
+        print(f"[AI CORE WARNING] Personality for '{npc_name}' not generated yet; continuing without it.")
+        return personality_summary, long_term_goals
             
     db = open_db(world_id)
     if db:
@@ -2073,6 +2090,10 @@ def _process_request_impl(api_key, model_name, payload):
         check_and_import_game_database(world_id)
         check_and_import_custom_lore(world_id)
         update_environment_from_payload(world_id, request_data)
+        try:
+            chat_layout.update()
+        except Exception as layout_err:
+            print(f"[AI CORE WARNING] Could not update chat bar position: {layout_err}")
         print(f"[AI CORE HUB] Activated active playing session '{world_id}' (Parent Save: '{parent_world_id}')")
         return json.dumps({"status": "ok"})
 
@@ -2289,8 +2310,14 @@ def _process_request_impl(api_key, model_name, payload):
     else:
         prompt_generator.write_prompt_logic_info(world_id, final_sys_prompt, npc_mem["short_term"], prompt)
         
-        reply = call_gemini_api(api_key, model_name, final_sys_prompt, npc_mem["short_term"])
+        reply = call_gemini_api(api_key, model_name, final_sys_prompt, npc_mem["short_term"], interactive=True)
         reply = clean_utf8_to_ansi(reply)
+        if not reply:
+            # Keep failed attempts out of this NPC's memory and the campaign log.
+            if npc_mem["short_term"] and npc_mem["short_term"][-1].get("role") == "user":
+                npc_mem["short_term"].pop()
+            save_memory(world_id, npc_id, npc_mem)
+            return json.dumps({"reply": "...", "display_name": get_clean_name_for_display(world_id, npc_id, npc_name), "commands": []})
         
         lua_cmds = []
         requested_items = []
@@ -2702,6 +2729,10 @@ def main():
         print(f"[AI CORE WARNING] Missing '{omw_script}'! Enable living_morrowind.omwscripts in MO2's plugin list so OpenMW loads the Lua scripts.")
     for line in paths.describe():
         print(f"[AI CORE DIAGNOSTIC] {line}")
+    try:
+        chat_layout.update()
+    except Exception as layout_err:
+        print(f"[AI CORE WARNING] Could not update chat bar position: {layout_err}")
     try:
         import landmass_autobuild
         landmass_autobuild.start_background()

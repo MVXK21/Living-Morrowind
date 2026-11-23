@@ -515,6 +515,21 @@ function serialize.getLocationData()
     return loc
 end
 
+local function currentStance()
+    local state = nil
+    pcall(function()
+        local stance = types.Actor.getStance(self)
+        if stance == types.Actor.STANCE.Weapon then
+            state = "weapon_drawn"
+        elseif stance == types.Actor.STANCE.Spell then
+            state = "spell_readied"
+        elseif stance == types.Actor.STANCE.Nothing then
+            state = "sheathed"
+        end
+    end)
+    return state
+end
+
 function serialize.getPlayerDataFull()
     local baseData = serialize.getPlayerData()
     local cellName = "Unknown Cell"
@@ -591,6 +606,7 @@ function serialize.getPlayerDataFull()
         level             = baseData.level,
         cell              = cellName,
         location          = serialize.getLocationData(),
+        combat_stance     = currentStance(),
         health            = health,
         magicka           = magicka,
         fatigue           = fatigue,
