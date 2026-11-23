@@ -1,6 +1,6 @@
 ================================================================================
                               LIVING MORROWIND
-            AI-driven NPCs, creatures and narrator for OpenMW (0.49 - 0.51)
+            AI-driven NPCs, creatures and narrator for OpenMW
 ================================================================================
 
 Talk to anyone in the world in your own words. NPCs remember you, react to your
@@ -21,7 +21,7 @@ Original mod: https://www.nexusmods.com/morrowind/mods/60221
 --------------------------------------------------------------------------------
 REQUIREMENTS
 --------------------------------------------------------------------------------
-  1. OpenMW 0.49, 0.50 or 0.51.
+  1. OpenMW 0.51 (tested; 0.49 and 0.50 are untested for in-menu chat).
   2. Mod Organizer 2 with the "OpenMW Player" plugin (standard in OpenMW
      modlists such as NEMAS). Manual installs also work; see the end of this file.
   3. Python 3.10 or newer: https://www.python.org/downloads/
@@ -118,16 +118,18 @@ MANUAL INSTALL (no MO2)
      (keep everything together: the daemon must stay next to "scripts").
   2. Add that folder to OpenMW, either way:
        - OpenMW Launcher -> Data Files -> add the folder as a data directory,
-         then tick living_morrowind.omwscripts in the content list, or
-       - edit openmw.cfg and add these two lines:
+         then tick living_morrowind.omwscripts and living_morrowind_chat.esp
+         in the content list, or
+       - edit openmw.cfg and add these lines:
              data="C:/Games/Living Morrowind"
+             content=living_morrowind_chat.esp
              content=living_morrowind.omwscripts
   3. Run "Launch Living Morrowind.bat" from that folder, then start OpenMW
      normally (launcher or openmw.exe).
 
   Extracting straight into Morrowind's "Data Files" folder also works, but it
   scatters the daemon files among your game data; a separate folder is tidier.
-  You still need to tick living_morrowind.omwscripts.
+  You still need to tick living_morrowind.omwscripts and living_morrowind_chat.esp.
 
   Without MO2, the daemon reads openmw.cfg and openmw.log from OpenMW's standard
   config folder:

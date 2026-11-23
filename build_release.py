@@ -16,7 +16,7 @@ import zipfile
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 MOD = os.path.join(HERE, "Living Morrowind")
-VERSION = sys.argv[1] if len(sys.argv) > 1 else "1.0.0"
+VERSION = sys.argv[1] if len(sys.argv) > 1 else "1.1.0"
 
 EXCLUDE_DIRS = {"__pycache__", "worlds", ".legacy_bak", ".corrupted_bak"}
 EXCLUDE_FILES = [".env", ".env.txt", "daemon_debug.log", "daemon_debug.log.old", "openmw.log",
